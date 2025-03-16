@@ -31,6 +31,9 @@ import { SERVER_URL } from '../../env.js'
 
 export default defineComponent({
   name: 'LoginPage',
+  mounted() {
+    document.title = 'Login - GSC Health'
+  },
   data() {
     return {
       email: '',

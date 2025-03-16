@@ -2,6 +2,17 @@
 import NavBar from './components/NavBar.vue'
 </script>
 
+<script>
+export default {
+  created() {
+    this.$router.beforeEach((to, from, next) => {
+      document.title = to.meta.title || 'GSC Health';
+      next();
+    });
+  }
+}
+</script>
+
 <template>
   <div id="app">
     <!-- <NavBar /> -->

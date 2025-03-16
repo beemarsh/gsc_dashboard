@@ -22,10 +22,13 @@
 </template>
 
 <script>
-import { SERVER_URL } from '../../env.js';
+const SERVER_URL = import.meta.env.VITE_API_URL;
 
 export default {
   name: 'RegisterPage',
+  mounted() {
+    document.title = 'Register - GSC Health'
+  },
   data() {
     return {
       name: '',
@@ -190,6 +193,9 @@ export default {
 .login-link a {
   color: #007bff;
   text-decoration: none;
+}
+h2 {
+  color: #666;
 }
 
 @media (max-width: 768px) {

@@ -62,6 +62,7 @@
 <script>
 import { defineComponent } from 'vue'
 import eventBus from '../services/eventBus'
+import { authService } from '../services/authService'
 
 export default defineComponent({
   name: 'DashboardPage',
@@ -74,18 +75,26 @@ export default defineComponent({
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
     },
-    handleLogout() {
-      // Clear local storage
-      localStorage.removeItem('token');
-      // Redirect to login
-      this.$router.push('/login');
+    async handleLogout() {
+      try {
+        await authService.logout();
+        this.$router.push('/login');
+      } catch (error) {
+        console.error('Logout failed:', error);
+        // Still redirect to login page even if the API call fails
+        localStorage.removeItem('token');
+        this.$router.push('/login');
+      }
     },
     openAddPartnerDialog() {
       eventBus.emit('open-add-partner-dialog')
     }
   },
   created() {
-    this.$router.push('/dashboard/partners');
+    // Only redirect if we're at the dashboard root
+    if (this.$route.path === '/dashboard') {
+      this.$router.push('/dashboard/partners');
+    }
   }
 })
 </script>
