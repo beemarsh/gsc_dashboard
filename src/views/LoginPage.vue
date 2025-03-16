@@ -4,15 +4,17 @@
       <h2>Welcome back</h2>
       <p>Please enter your details</p>
       <div v-if="error" class="error-message">{{ error }}</div>
-      <input type="email" placeholder="Email address" v-model="email" />
-      <input type="password" placeholder="Password" v-model="password" />
-      <div class="options">
-        <label>
-          <input type="checkbox" /> Remember for 30 days
-        </label>
-        <router-link to="/forgot-password">Forgot password</router-link>
-      </div>
-      <button class="login-button" @click="loginWithEmail">Login</button>
+      <form @submit.prevent="loginWithEmail">
+        <input type="email" placeholder="Email address" v-model="email" @keyup.enter="loginWithEmail" />
+        <input type="password" placeholder="Password" v-model="password" @keyup.enter="loginWithEmail" />
+        <div class="options">
+          <label>
+            <input type="checkbox" /> Remember for 30 days
+          </label>
+          <router-link to="/forgot-password">Forgot password</router-link>
+        </div>
+        <button type="submit" class="login-button">Login</button>
+      </form>
       <button class="google-button" @click="loginWithGoogle">
         <img src="@/assets/google-icon.png" alt="Google icon" /> Sign in with Google
       </button>
@@ -24,9 +26,10 @@
 </template>
 
 <script>
-import { SERVER_URL } from '../../env.js';
+import { defineComponent } from 'vue'
+import { SERVER_URL } from '../../env.js'
 
-export default {
+export default defineComponent({
   name: 'LoginPage',
   data() {
     return {
@@ -57,7 +60,7 @@ export default {
 
         // Validate password
         if (!this.validatePassword(this.password)) {
-          this.error = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number';
+          this.error = 'Password must be at least 8 characters long and uppercase, lowercase letter, and a number';
           return;
         }
 
@@ -66,6 +69,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({
             email: this.email,
             password: this.password
@@ -82,7 +86,7 @@ export default {
           // Redirect to dashboard
           this.$router.push('/dashboard');
         } else {
-          this.error = data.message || 'Login failed';
+          this.error = data.message || 'Your username or password is wrong.';
         }
       } catch (err) {
         this.error = 'An error occurred during login';
@@ -93,7 +97,7 @@ export default {
       // Implement Google OAuth login
     }
   }
-}
+})
 </script>
 
 <style scoped>
@@ -120,6 +124,7 @@ export default {
 .login-form h2 {
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
+  color: #666;
 }
 
 .login-form p {

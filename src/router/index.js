@@ -1,39 +1,53 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import LandingPage from '@/views/LandingPage.vue';
-import LoginPage from '@/views/LoginPage.vue';
-import AboutPage from '@/views/AboutPage.vue';
-import RegisterPage from '@/views/RegisterPage.vue'; // Import RegisterPage
-import DashboardView from '../views/DashboardView.vue'
-
-const routes = [
-  { path: '/', component: LandingPage },
-  { path: '/login', component: LoginPage },
-  { path: '/about', component: AboutPage },
-  { path: '/register', component: RegisterPage }, // Add RegisterPage route
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: DashboardView,
-    meta: { requiresAuth: true }
-  }
-];
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginPage from '../views/LoginPage.vue'
+import DashboardPage from '../views/DashboardPage.vue'
+import Partners from '../views/Partners.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
-});
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      redirect: '/login'
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginPage
+    },
+    {
+      path: '/dashboard',
+      component: DashboardPage,
+      children: [
+        {
+          path: '',
+          redirect: '/dashboard/partners'
+        },
+        {
+          path: 'partners',
+          component: Partners
+        },
+        // {
+        //   path: 'events',
+        //   component: () => import('../views/Events.vue')
+        // },
+        // {
+        //   path: 'training',
+        //   component: () => import('../views/Training.vue')
+        // }
+      ]
+    }
+  ]
+})
 
-// Add navigation guard to check authentication
+// Add navigation guard to check for auth
 // router.beforeEach((to, from, next) => {
-//   if (to.matched.some(record => record.meta.requiresAuth)) {
-//     if (!localStorage.getItem('token')) {
-//       next('/login')
-//     } else {
-//       next()
-//     }
+//   const isAuthenticated = localStorage.getItem('token')
+//   if (to.path !== '/login' && !isAuthenticated) {
+//     next('/login')
 //   } else {
 //     next()
 //   }
-// });
+// })
 
-export default router;
+export default router

@@ -3,12 +3,14 @@
     <div class="register-form">
       <h2>Create an account</h2>
       <p>Enter your details to register</p>
-      <input type="text" placeholder="Full Name" v-model="name" />
-      <input type="email" placeholder="Email address" v-model="email" />
-      <input type="password" placeholder="Password" v-model="password" />
-      <input type="password" placeholder="Confirm Password" v-model="confirmPassword" />
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      <button class="register-button" @click="registerWithEmail">Register</button>
+      <form @submit.prevent="registerWithEmail">
+        <input type="text" placeholder="Full Name" v-model="name" @keyup.enter="registerWithEmail" />
+        <input type="email" placeholder="Email address" v-model="email" @keyup.enter="registerWithEmail" />
+        <input type="password" placeholder="Password" v-model="password" @keyup.enter="registerWithEmail" />
+        <input type="password" placeholder="Confirm Password" v-model="confirmPassword" @keyup.enter="registerWithEmail" />
+        <button type="submit" class="register-button">Register</button>
+      </form>
       <button class="google-button" @click="registerWithGoogle">
         <img src="@/assets/google-icon.png" alt="Google icon" /> Register with Google
       </button>
@@ -20,6 +22,8 @@
 </template>
 
 <script>
+import { SERVER_URL } from '../../env.js';
+
 export default {
   name: 'RegisterPage',
   data() {
@@ -32,41 +36,62 @@ export default {
     };
   },
   methods: {
-    registerWithEmail() {
-      this.errorMessage = ''; // Clear previous errors
+    validatePassword(password) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+      return passwordRegex.test(password);
+    },
+    async registerWithEmail() {
+      try {
+        this.errorMessage = ''; // Clear previous errors
 
-      if (!this.name) {
-        this.errorMessage = 'Please enter your name.';
-        return;
-      }
-      if (!this.email) {
-        this.errorMessage = 'Please enter your email.';
-        return;
-      }
-      if (!this.password) {
-        this.errorMessage = 'Please enter your password.';
-        return;
-      }
-      if (this.password !== this.confirmPassword) {
-        this.errorMessage = 'Passwords do not match.';
-        return;
-      }
+        // Basic validations
+        if (!this.name || !this.email || !this.password) {
+          this.errorMessage = 'All fields are required';
+          return;
+        }
 
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(this.email)) {
-        this.errorMessage = 'Please enter a valid email address.';
-        return;
-      }
+        if (this.password !== this.confirmPassword) {
+          this.errorMessage = 'Passwords do not match';
+          return;
+        }
 
-      // Password validation (example: at least 8 characters)
-      if (this.password.length < 8) {
-        this.errorMessage = 'Password must be at least 8 characters long.';
-        return;
-      }
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.email)) {
+          this.errorMessage = 'Please enter a valid email address';
+          return;
+        }
 
-      // Implement registration logic here (e.g., API call)
-      alert('Registration successful!');
+        // Password validation
+        if (!this.validatePassword(this.password)) {
+          this.errorMessage = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number';
+          return;
+        }
+
+        const response = await fetch(`${SERVER_URL}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.name,
+            email: this.email,
+            password: this.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Redirect to login page on successful registration
+          this.$router.push('/login');
+        } else {
+          this.errorMessage = data.message || 'Please provide proper details.';
+        }
+      } catch (err) {
+        this.errorMessage = 'An error occurred during registration';
+        console.error('Registration error:', err);
+      }
     },
     registerWithGoogle() {
       // Implement Google OAuth registration
@@ -107,8 +132,14 @@ export default {
 }
 
 .error-message {
-  color: red;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem;
   margin-bottom: 1rem;
+  text-align: left;
+  font-size: 0.875rem;
 }
 
 .register-form input {
