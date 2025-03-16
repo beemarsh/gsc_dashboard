@@ -1,47 +1,64 @@
 <template>
   <div class="partners-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1 color="#666">Partners</h1>
-      <div class="d-flex gap-2">
-        <div class="search-box">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Search partners..." v-model="searchQuery">
-        </div>
-        <button class="btn btn-primary" @click="showAddDialog = true">
-          <i class="bi bi-plus-lg"></i> Add Partner
-        </button>
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
-    <!-- Partners list placeholder -->
-    <div class="partners-grid">
-      <div class="partner-card" v-for="i in 6" :key="i">
-        <div class="partner-logo">
-          <i class="bi bi-building"></i>
+    <!-- Main Content (blur when loading) -->
+    <div :class="{ 'content-blur': loading }">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 color="#666">Partners</h1>
+        <div class="d-flex gap-2">
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search partners..." v-model="searchQuery">
+          </div>
+          <button class="btn btn-primary" @click="showAddDialog = true">
+            <i class="bi bi-plus-lg"></i> Add Partner
+          </button>
         </div>
-        <div class="partner-info">
-          <h3>Partner Company {{ i }}</h3>
-          <p class="text-muted">Healthcare</p>
-          <div class="partner-stats">
-            <span><i class="bi bi-people"></i> 150 Members</span>
-            <span><i class="bi bi-calendar-event"></i> 12 Events</span>
+      </div>
+
+      <!-- Partners list or empty state -->
+      <div v-if="partners.length > 0" class="partners-grid">
+        <div class="partner-card" v-for="partner in partners" :key="partner.partner_id">
+          <div class="partner-logo">
+            <i class="bi bi-building"></i>
+          </div>
+          <div class="partner-info">
+            <h3>{{ partner.organization_name }}</h3>
+            <p class="text-muted">{{ partner.type }}</p>
+            <div class="partner-stats">
+              <span><i class="bi bi-person"></i> {{ partner.contact_person }}</span>
+              <span><i class="bi bi-envelope"></i> {{ partner.contact_email }}</span>
+            </div>
           </div>
         </div>
       </div>
+      <div v-else class="empty-state">
+        <i class="bi bi-people text-muted"></i>
+        <h3>No Partners Found</h3>
+        <p class="text-muted">Get started by adding your first partner</p>
+       
+      </div>
+      
+      <!-- Add Partner Dialog -->
+      <AddPartnerDialog 
+        v-if="showAddDialog"
+        @close="showAddDialog = false"
+        @submit="handleAddPartner"
+      />
     </div>
-    
-    <!-- Add Partner Dialog -->
-    <AddPartnerDialog 
-      v-if="showAddDialog"
-      @close="showAddDialog = false"
-      @submit="handleAddPartner"
-    />
   </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
 import AddPartnerDialog from '../components/AddPartnerDialog.vue'
+import { SERVER_URL } from '../../env.js'
 
 export default defineComponent({
   name: 'Partners',
@@ -51,15 +68,72 @@ export default defineComponent({
   data() {
     return {
       searchQuery: '',
-      showAddDialog: false
+      showAddDialog: false,
+      partners: [],
+      loading: true,
+      error: null
+    }
+  },
+  async created() {
+    try {
+      const response = await fetch(`${SERVER_URL}/server/partner/get`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        credentials: 'include'
+      });
+
+      if (response.status === 401) {
+        // Unauthorized, redirect to login
+        this.$router.push('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch partners');
+      }
+
+      const data = await response.json();
+      this.partners = data.partners || [];
+      this.loading = false;
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      this.error = error.message;
+      this.loading = false;
     }
   },
   methods: {
-    handleAddPartner(partnerData) {
-      console.log('New partner data:', partnerData)
-      // Here you would typically make an API call to save the partner
-      // After successful save:
-      this.showAddDialog = false
+    async handleAddPartner(partnerData) {
+      try {
+        // Save the new partner
+        const response = await fetch(`${SERVER_URL}/server/partner/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          credentials: 'include',
+          body: JSON.stringify(partnerData)
+        });
+
+        if (response.status === 401) {
+          this.$router.push('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to add partner');
+        }
+
+        // Refresh the partners list
+        this.created();
+        this.showAddDialog = false;
+      } catch (error) {
+        console.error('Error adding partner:', error);
+        // You might want to show an error message to the user here
+      }
     }
   }
 })
@@ -147,5 +221,50 @@ export default defineComponent({
 
 .partner-stats i {
   margin-right: 5px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.content-blur {
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
 }
 </style>
