@@ -21,11 +21,7 @@
         
       </div>
 
-      <div class="add-partner-section">
-        <button class="btn btn-primary w-100">
-          <i class="bi bi-plus-lg"></i> Add Partner
-        </button>
-      </div>
+     
 
       <div class="nav-links">
         <router-link to="/dashboard/partners" class="nav-item" active-class="active">
@@ -35,7 +31,10 @@
           <i class="bi bi-calendar-event"></i> Events
         </router-link>
         <router-link to="/dashboard/training" class="nav-item" active-class="active">
-          <i class="bi bi-book"></i> Training Programs
+          <i class="bi bi-book"></i> Training (Coming Soon)
+        </router-link>
+        <router-link to="/dashboard/meetings" class="nav-item" active-class="active">
+          <i class="bi bi-book"></i> Meetings (Coming Soon)
         </router-link>
       </div>
 
@@ -62,6 +61,7 @@
 
 <script>
 import { defineComponent } from 'vue'
+import eventBus from '../services/eventBus'
 
 export default defineComponent({
   name: 'DashboardPage',
@@ -79,6 +79,9 @@ export default defineComponent({
       localStorage.removeItem('token');
       // Redirect to login
       this.$router.push('/login');
+    },
+    openAddPartnerDialog() {
+      eventBus.emit('open-add-partner-dialog')
     }
   },
   created() {

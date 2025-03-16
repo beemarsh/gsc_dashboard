@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '../views/LoginPage.vue'
 import DashboardPage from '../views/DashboardPage.vue'
 import Partners from '../views/Partners.vue'
+import EventsPage from '../views/EventsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,10 +28,10 @@ const router = createRouter({
           path: 'partners',
           component: Partners
         },
-        // {
-        //   path: 'events',
-        //   component: () => import('../views/Events.vue')
-        // },
+        {
+          path: 'events',
+          component: EventsPage
+        }
         // {
         //   path: 'training',
         //   component: () => import('../views/Training.vue')
