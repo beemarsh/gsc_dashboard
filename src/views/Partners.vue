@@ -50,6 +50,15 @@
         v-if="showAddDialog"
         @close="showAddDialog = false"
         @submit="handleAddPartner"
+        @error="handleError"
+      />
+
+      <!-- Snackbar -->
+      <SnackBar
+        :show="!!notification.message"
+        :message="notification.message"
+        :type="notification.type"
+        @close="clearNotification"
       />
     </div>
   </div>
@@ -58,12 +67,14 @@
 <script>
 import { defineComponent } from 'vue'
 import AddPartnerDialog from '../components/AddPartnerDialog.vue'
+import SnackBar from '../components/SnackBar.vue'
 import { SERVER_URL } from '../../env.js'
 
 export default defineComponent({
   name: 'Partners',
   components: {
-    AddPartnerDialog
+    AddPartnerDialog,
+    SnackBar
   },
   data() {
     return {
@@ -71,51 +82,36 @@ export default defineComponent({
       showAddDialog: false,
       partners: [],
       loading: true,
-      error: null
+      error: null,
+      notification: {
+        message: '',
+        type: 'success'
+      }
     }
   },
   async created() {
-    try {
-      const response = await fetch(`${SERVER_URL}/server/partner/get`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        credentials: 'include'
-      });
-
-      if (response.status === 401) {
-        // Unauthorized, redirect to login
-        this.$router.push('/login');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch partners');
-      }
-
-      const data = await response.json();
-      this.partners = data.partners || [];
-      this.loading = false;
-    } catch (error) {
-      console.error('Error fetching partners:', error);
-      this.error = error.message;
-      this.loading = false;
-    }
+    await this.fetchPartners()
   },
   methods: {
-    async handleAddPartner(partnerData) {
+    showNotification(message, type = 'success') {
+      this.notification = { message, type }
+      setTimeout(this.clearNotification, type === 'success' ? 3000 : 10000)
+    },
+    clearNotification() {
+      this.notification = { message: '', type: 'success' }
+    },
+    handleError(message) {
+      this.showNotification(message, 'error')
+    },
+    async fetchPartners() {
+      this.loading = true
       try {
-        // Save the new partner
-        const response = await fetch(`${SERVER_URL}/server/partner/add`, {
-          method: 'POST',
+        const response = await fetch(`${SERVER_URL}/partner/get`, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
-          credentials: 'include',
-          body: JSON.stringify(partnerData)
+          credentials: 'include'
         });
 
         if (response.status === 401) {
@@ -124,15 +120,46 @@ export default defineComponent({
         }
 
         if (!response.ok) {
-          throw new Error('Failed to add partner');
+          throw new Error('Failed to fetch partners');
         }
 
-        // Refresh the partners list
-        this.created();
-        this.showAddDialog = false;
+        const data = await response.json();
+        this.partners = data.partners || [];
       } catch (error) {
-        console.error('Error adding partner:', error);
-        // You might want to show an error message to the user here
+        console.error('Error fetching partners:', error);
+        this.error = error.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async handleAddPartner(partnerData) {
+      try {
+        const response = await fetch(`${SERVER_URL}/partner/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(partnerData)
+        });
+
+        if (response.status === 401) {
+          this.$router.push('/login')
+          return
+        }
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.details || 'Failed to add partner')
+        }
+
+        this.showNotification('Partner added successfully')
+        this.showAddDialog = false
+        // Refresh partners list using the new method
+        await this.fetchPartners()
+      } catch (error) {
+        this.handleError(error.message)
       }
     }
   }
@@ -209,6 +236,7 @@ export default defineComponent({
 .partner-info h3 {
   margin: 0;
   font-size: 1.1rem;
+  color: #666;
 }
 
 .partner-stats {

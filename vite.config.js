@@ -14,16 +14,16 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  // server: {
-  //   host: 'api.gulfsouth.info',
-  //   port: 5173,
-  //   cors: true,
-  //   headers: {
-  //     'Access-Control-Allow-Origin': '*'
-  //   },
-  //   allowedHosts: [
-  //     'gulfsouth.info',
-  //     'www.gulfsouth.info'
-  //   ]
-  // }
+  server: {
+    host: 'api.gulfsouth.info',
+    port: 5173,
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    allowedHosts: [
+      'gulfsouth.info',
+      'www.gulfsouth.info'
+    ]
+  }
 })
