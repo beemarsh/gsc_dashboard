@@ -22,7 +22,7 @@
 </template>
 
 <script>
-const SERVER_URL = import.meta.env.VITE_API_URL;
+import { SERVER_URL } from '../../env.js'
 
 export default {
   name: 'RegisterPage',
@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     validatePassword(password) {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\s\S]).{8,}$/;
       return passwordRegex.test(password);
     },
     async registerWithEmail() {
@@ -67,7 +67,7 @@ export default {
 
         // Password validation
         if (!this.validatePassword(this.password)) {
-          this.errorMessage = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number';
+          this.errorMessage = 'An uppercase letter, a lowercase and a special character is required for passwords.';
           return;
         }
 

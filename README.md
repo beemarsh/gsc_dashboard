@@ -1,42 +1,90 @@
-# GSC Dashboard
+# GSC Health Dashboard
 
-## Recommended IDE Setup
+A simple dashboard application for managing partners and events in GSC Health.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## What's Inside?
 
-## Customize configuration
+### Pages
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+1. **Login Page**
+   - Simple login form with email and password
+   - "Remember me" option
+   - Google login button (coming soon)
+   - Link to registration page
 
-## Project setup
+2. **Register Page**
+   - New user registration form
+   - Basic validation for email and password
 
+3. **Partners Page**
+   - List of all partners in a grid layout
+   - Search partners by name
+   - Add new partners
+   - Edit existing partners
+   - Delete partners
+   - Copy contact details with one click
+
+4. **Events Page**
+   - List of upcoming and past events
+   - Search events
+   - Add new events with date picker
+   - Edit existing events
+   - Delete events
+   - Status indicators for expired/upcoming events
+
+### Components We Use
+
+1. **Shared Components**
+   - `SnackBar`: Shows success/error messages
+   - `ConfirmDialog`: Asks for confirmation before deleting
+   - `AddPartnerDialog`: Form for adding/editing partners
+   - `AddEventDialog`: Form for adding/editing events with date picker
+
+2. **Dashboard Layout**
+   - Sidebar navigation (collapsible on mobile)
+   - Company logo and branding
+   - Logout button
+   - Mobile-friendly design
+
+### Cool Features
+
+- **Search**: Quick search in partners and events
+- **Responsive Design**: Works well on both desktop and mobile
+- **Form Validation**: Prevents invalid data entry
+- **Loading States**: Shows loading spinners during operations
+- **Error Handling**: Clear error messages when something goes wrong
+- **Notifications**: Feedback for all user actions
+- **Date Picker**: Easy date and time selection for events
+
+### Technical Details
+
+- Built with Vue 3
+- Uses Vue Router for navigation
+- Bootstrap for styling
+- Bootstrap Icons for icons
+- Custom components for dialogs and forms
+- Responsive design for all screen sizes
+
+## Setup Instructions
+
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-### Compiles and hot-reloads for development
-
+2. Run for development:
 ```bash
 npm run dev
 ```
 
-### Compiles and minifies for production
-
+3. Build for production:
 ```bash
 npm run build
 ```
 
-### Lints and fixes files
+## Coming Soon
 
-```bash
-npm run lint
-```
-
-## Project Structure
-
-- `src/assets`: Contains CSS and image assets.
-- `src/components`: Contains reusable Vue components.
-- `src/views`: Contains page components for routing.
-- `src/router`: Contains the router configuration.
-- `src/App.vue`: Main application component.
-- `src/main.js`: Entry point for the application.
+- Training section
+- Meetings section
+- Google authentication
+- Advanced filtering options

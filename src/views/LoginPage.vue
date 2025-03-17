@@ -47,7 +47,7 @@ export default defineComponent({
       return emailRegex.test(email);
     },
     validatePassword(password) {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\s\S]).{8,}$/;
       return passwordRegex.test(password);
     },
     async loginWithEmail() {
@@ -63,7 +63,7 @@ export default defineComponent({
 
         // Validate password
         if (!this.validatePassword(this.password)) {
-          this.error = 'Password must be at least 8 characters long and uppercase, lowercase letter, and a number';
+          this.error = 'An uppercase letter, a lowercase and a special character is required for passwords.';
           return;
         }
 

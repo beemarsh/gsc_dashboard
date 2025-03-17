@@ -30,10 +30,10 @@
         <router-link to="/dashboard/events" class="nav-item" active-class="active">
           <i class="bi bi-calendar-event"></i> Events
         </router-link>
-        <router-link to="/dashboard/training" class="nav-item" active-class="active">
+        <router-link to="/dashboard/events" class="nav-item" active-class="active">
           <i class="bi bi-book"></i> Training (Coming Soon)
         </router-link>
-        <router-link to="/dashboard/meetings" class="nav-item" active-class="active">
+        <router-link to="/dashboard/events" class="nav-item" active-class="active">
           <i class="bi bi-book"></i> Meetings (Coming Soon)
         </router-link>
       </div>
